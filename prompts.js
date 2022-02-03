@@ -84,21 +84,39 @@ const promptUser = () => {
     });
 };
 
+const returnPromptUser = () => {
+  inquirer
+    .prompt([
+      {
+        type: 'confirm',
+        name: 'confirmReturn',
+        message: 'Return to the Main Menu?',
+        default: true,
+      },
+    ])
+    .then((answer) => {
+      if (answer.confirmReturn) {
+        return promptUser();
+      }
+      return db.end();
+    });
+};
+
 const allDepartments = () => {
   let sql = `SELECT department.id AS "ID", department.name AS "Department" FROM department`;
   db.query(sql, (err, res) => {
     if (err) throw err;
     console.table(res);
-    promptUser();
+    returnPromptUser();
   });
 };
 
 const allEmployees = () => {
-  let sql = `SELECT employee.id AS "ID", first_name AS "First Name", last_name AS "Last Name" FROM employee`;
+  let sql = `SELECT employee.id AS "ID", first_name AS "First Name", last_name AS "Last Name", role.title AS Role FROM employee LEFT JOIN role ON (role.id = employee.role_id)`;
   db.query(sql, (err, res) => {
     if (err) throw err;
     console.table(res);
-    promptUser();
+    returnPromptUser();
   });
 };
 
@@ -107,17 +125,39 @@ const allRoles = () => {
   db.query(sql, (err, res) => {
     if (err) throw err;
     console.table(res);
-    promptUser();
+    returnPromptUser();
   });
 };
 
 const empByDept = () => {
-  let sql = `SELECT department.name AS "Department", role.title AS "Role", employee.id AS "ID", first_name AS "First Name", last_name AS "Last Name" FROM employee LEFT JOIN role ON (role.id = employee.role_id) LEFT JOIN department ON department.id = role.department_id`;
-  db.query(sql, (err, res) => {
-    if (err) throw err;
-    console.table(res);
-    promptUser();
-  });
+  inquirer
+    .prompt([
+      {
+        type: 'list',
+        name: 'departments',
+        message: 'Which Department would you like to access?',
+        choices: ['Engineering', 'Finance', 'Legal', 'Management', 'Sales'],
+      },
+    ])
+    .then((answer) => {
+      if (
+        answer.departments === 'Engineering' ||
+        answer.departments === 'Finance' ||
+        answer.departments === 'Legal' ||
+        answer.departments === 'Management' ||
+        answer.departments === 'Sales'
+      ) {
+        let department = answer.departments;
+        console.log(department);
+
+        let sql = `SELECT employee.id AS "ID", first_name AS "First Name", last_name AS "Last Name", department.name AS "Department", role.title AS "Role" FROM employee LEFT JOIN role ON (role.id = employee.role_id) LEFT JOIN department ON department.id = role.department_id WHERE department.name = "${department}"`;
+        db.query(sql, (err, res) => {
+          if (err) throw err;
+          console.table(res);
+          returnPromptUser();
+        });
+      }
+    });
 };
 
 const empByManager = () => {
@@ -125,7 +165,7 @@ const empByManager = () => {
   db.query(sql, (err, res) => {
     if (err) throw err;
     console.table(res);
-    promptUser();
+    returnPromptUser();
   });
 };
 
