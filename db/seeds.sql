@@ -8,21 +8,21 @@ VALUES
 
 INSERT INTO role (title, salary, department_id)
 VALUES
-  ('Lead Engineer', 150000, 1),
-  ('Software Engineer', 120000, 1),
-  ('Intern Engineer', 90000, 1),
-  ('Account Manager', 155000, 2),
-  ('Accountant', 125000, 2),
-  ('Clerk', 60000, 2),
-  ('Legal Team Lead', 250000, 3),
-  ('Lawyer', 190000, 3),
-  ('Legal Aide', 75000, 3),
-  ('Engineering Manager', 165000, 4),
-  ('Finance Manager', 165000, 4),
-  ('Legal Manager', 180000, 4),
-  ('Sales Manager', 145000, 4),
-  ('Sales Lead', 100000, 5),
-  ('Salesperson', 80000, 5);
+  ('Lead Engineer', '150000', 1),
+  ('Software Engineer', '120000', 1),
+  ('Intern Engineer', '90000', 1),
+  ('Account Manager', '155000', 2),
+  ('Accountant', '125000', 2),
+  ('Clerk', '60000', 2),
+  ('Legal Team Lead', '250000', 3),
+  ('Lawyer', '190000', 3),
+  ('Legal Aide', '75000', 3),
+  ('Engineering Manager', '165000', 4),
+  ('Finance Manager', '165000', 4),
+  ('Legal Manager', '180000', 4),
+  ('Sales Manager', '145000', 4),
+  ('Sales Lead', '100000', 5),
+  ('Salesperson', '80000', 5);
 
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
 VALUES

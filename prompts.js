@@ -297,7 +297,6 @@ const addEmp = () => {
                 .then((answer) => {
                   const manager = answer.manager;
                   newEmp.push(manager);
-                  console.log(newEmp);
 
                   let sql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
                             VALUE (?,?,?,?)`;
@@ -313,9 +312,138 @@ const addEmp = () => {
     });
 };
 
-const addRole = () => {};
+const addRole = () => {
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'addRole',
+        message: 'What is the title of the new Role?',
+        validate: (confirmAddRole) => {
+          if (confirmAddRole) {
+            return true;
+          }
+          console.info('Please enter a role');
+          return false;
+        },
+      },
+      {
+        type: 'input',
+        name: 'salary',
+        message: 'What is the salary of the new Role?',
+        validate: (confirmSalary) => {
+          if (!isNaN(confirmSalary)) {
+            return true;
+          }
+          console.info('Please enter a salary');
+          return false;
+        },
+      },
+    ])
+    .then((answers) => {
+      const newRole = [answers.addRole, answers.salary];
 
-const updateRole = () => {};
+      const roleSql = `SELECT name, id FROM department`;
+
+      db.query(roleSql, (err, res) => {
+        if (err) throw err;
+
+        const dept = res.map(({ name, id }) => ({ name: name, value: id }));
+
+        inquirer
+          .prompt([
+            {
+              type: 'list',
+              name: 'department',
+              message:
+                'What department would you like the new Role associated?',
+              choices: dept,
+            },
+          ])
+          .then((deptChoice) => {
+            const dept = deptChoice.department;
+
+            newRole.push(dept);
+
+            const sql = `INSERT INTO role (title, salary, department_id)
+                        VALUES (?,?,?)`;
+
+            db.query(sql, newRole, (err, res) => {
+              if (err) throw err;
+              console.info('Added ' + answers.addRole + ' to Roles!');
+
+              allRoles();
+            });
+          });
+      });
+    });
+};
+
+const updateRole = () => {
+  const empSql = `SELECT * FROM employee`;
+
+  db.query(empSql, (err, res) => {
+    if (err) throw err;
+
+    const employees = res.map(({ id, first_name, last_name }) => ({
+      name: first_name + ' ' + last_name,
+      value: id,
+    }));
+
+    inquirer
+      .prompt([
+        {
+          type: 'list',
+          name: 'empName',
+          message: 'Which Employee would you like to update?',
+          choices: employees,
+        },
+      ])
+      .then((answer) => {
+        const employee = answer.empName;
+        const updatedEmp = [];
+        updatedEmp.push(employee);
+
+        const roleSql = `SELECT * FROM role`;
+
+        db.query(roleSql, (err, res) => {
+          if (err) throw err;
+
+          const roles = res.map(({ id, title }) => ({
+            name: title,
+            value: id,
+          }));
+
+          inquirer
+            .prompt([
+              {
+                type: 'list',
+                name: 'role',
+                message: 'What is the Employees updated Role?',
+                choices: roles,
+              },
+            ])
+            .then((answer) => {
+              const newRole = answer.role;
+              updatedEmp.push(newRole);
+
+              let employee = updatedEmp[0];
+              updatedEmp[0] = newRole;
+              updatedEmp[1] = employee;
+
+              const sql = `UPDATE employee SET role_id = ? WHERE id = ?`;
+
+              db.query(sql, updatedEmp, (err, res) => {
+                if (err) throw err;
+                console.info('Employee has been Updated!');
+
+                allEmployees();
+              });
+            });
+        });
+      });
+  });
+};
 
 const quit = () => db.end();
 
