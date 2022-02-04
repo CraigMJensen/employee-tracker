@@ -28,6 +28,9 @@ const promptUser = () => {
           'Add an Employee',
           'Add a Role',
           'Update an Employee Role',
+          'Delete a Department',
+          'Delete an Employee',
+          'Delete a Role',
           'Quit',
         ],
       },
@@ -70,6 +73,18 @@ const promptUser = () => {
 
         case 'Update an Employee Role':
           updateRole();
+          break;
+
+        case 'Delete a Department':
+          deleteDept();
+          break;
+
+        case 'Delete an Employee':
+          deleteEmp();
+          break;
+
+        case 'Delete a Role':
+          deleteRole();
           break;
 
         case 'Quit':
@@ -234,7 +249,7 @@ const addEmp = () => {
           if (namePresent) {
             return true;
           }
-          console.log('Please enter a first name');
+          console.info('Please enter a first name');
           return false;
         },
       },
@@ -246,7 +261,7 @@ const addEmp = () => {
           if (namePresent) {
             return true;
           }
-          console.log('Please enter a last name');
+          console.info('Please enter a last name');
           return false;
         },
       },
@@ -444,6 +459,58 @@ const updateRole = () => {
       });
   });
 };
+
+const deleteDept = () => {
+  const deptSql = `SELECT * FROM department`;
+
+  db.query(deptSql, (err, res) => {
+    if (err) throw err;
+
+    const dept = res.map(({ name, id }) => ({ name: name, value: id }));
+
+    inquirer
+      .prompt([
+        {
+          type: 'list',
+          name: 'confirmDelete',
+          message: `** WARNING **\n This action will delete all Roles and Employees in the associated Department.  Are you certain you would like to continue?`,
+          choices: ['NO', 'YES'],
+        },
+      ])
+      .then((answer) => {
+        if (answer.confirmDelete === 'NO') {
+          return promptUser();
+        } else {
+          inquirer
+            .prompt([
+              {
+                type: 'list',
+                name: 'dept',
+                message: 'What Department would you like to delete?',
+                choices: dept,
+              },
+            ])
+            .then((answer) => {
+              const deptDel = answer.dept;
+              const sql = `DELETE FROM department
+                    WHERE id = ?`;
+
+              db.query(sql, deptDel, (err, res) => {
+                if (err) throw err;
+
+                console.info('Successfully deleted!');
+
+                allDepartments();
+              });
+            });
+        }
+      });
+  });
+};
+
+const deleteEmp = () => {};
+
+const deleteRole = () => {};
 
 const quit = () => db.end();
 
