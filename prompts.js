@@ -8,6 +8,7 @@ connected = () => {
   console.info('|       EMPLOYEE MANAGER       |');
   console.info('|                              |');
   console.info('+------------------------------+\n');
+
   promptUser();
 };
 
@@ -117,6 +118,7 @@ const allDepartments = () => {
   db.query(sql, (err, res) => {
     if (err) throw err;
     console.table(res);
+
     returnPromptUser();
   });
 };
@@ -129,6 +131,7 @@ const allEmployees = () => {
   db.query(sql, (err, res) => {
     if (err) throw err;
     console.table(res);
+
     returnPromptUser();
   });
 };
@@ -139,6 +142,7 @@ const allRoles = () => {
   db.query(sql, (err, res) => {
     if (err) throw err;
     console.table(res);
+
     returnPromptUser();
   });
 };
@@ -173,6 +177,7 @@ const empByDept = () => {
         db.query(sql, (err, res) => {
           if (err) throw err;
           console.table(res);
+
           returnPromptUser();
         });
       }
@@ -211,6 +216,7 @@ const empByManager = () => {
         db.query(sql, (err, res) => {
           if (err) throw err;
           console.table(res);
+
           returnPromptUser();
         });
       }
@@ -232,7 +238,10 @@ const addDept = () => {
                 VALUES (?)`;
       db.query(sql, newDept, (err, res) => {
         if (err) throw err;
+        console.info('');
         console.info(`Added ${newDept} to Departments!`);
+        console.info('');
+
         allDepartments();
       });
     });
@@ -317,7 +326,10 @@ const addEmp = () => {
                             VALUE (?,?,?,?)`;
                   db.query(sql, newEmp, (err, res) => {
                     if (err) throw err;
+                    console.info('');
                     console.info('New Employee added!');
+                    console.info('');
+
                     allEmployees();
                   });
                 });
@@ -385,7 +397,9 @@ const addRole = () => {
 
             db.query(sql, newRole, (err, res) => {
               if (err) throw err;
+              console.info('');
               console.info('Added ' + answers.addRole + ' to Roles!');
+              console.info('');
 
               allRoles();
             });
@@ -450,7 +464,9 @@ const updateRole = () => {
 
               db.query(sql, updatedEmp, (err, res) => {
                 if (err) throw err;
+                console.info('');
                 console.info('Employee has been Updated!');
+                console.info('');
 
                 allEmployees();
               });
@@ -497,8 +513,9 @@ const deleteDept = () => {
 
               db.query(sql, deptDel, (err, res) => {
                 if (err) throw err;
-
+                console.info('');
                 console.info('Successfully deleted!');
+                console.info('');
 
                 allDepartments();
               });
@@ -551,8 +568,10 @@ const deleteEmp = () => {
                                 WHERE id = ${empToDelete}`;
               db.query(deleteSql, empToDelete, (err, res) => {
                 if (err) throw err;
-
+                console.info('');
                 console.info(`Employee #${empToDelete} has been Deleted!`);
+                console.info('');
+
                 allEmployees();
               });
             }
@@ -604,8 +623,10 @@ const deleteRole = () => {
                                 WHERE id = ${roleToDelete}`;
               db.query(deleteSql, roleToDelete, (err, res) => {
                 if (err) throw err;
-
+                console.info('');
                 console.info(`The Role has been Deleted!`);
+                console.info('');
+
                 allRoles();
               });
             }
