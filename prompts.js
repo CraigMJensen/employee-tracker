@@ -508,9 +508,111 @@ const deleteDept = () => {
   });
 };
 
-const deleteEmp = () => {};
+const deleteEmp = () => {
+  const empSql = `SELECT * FROM employee`;
+  const empToDelete = [];
 
-const deleteRole = () => {};
+  db.query(empSql, (err, res) => {
+    if (err) throw err;
+
+    const employees = res.map(({ first_name, last_name, id }) => ({
+      name: first_name + ' ' + last_name,
+      value: id,
+    }));
+
+    inquirer
+      .prompt([
+        {
+          type: 'list',
+          name: 'empList',
+          message: 'Which Employee record is to be Delete?',
+          choices: employees,
+        },
+      ])
+      .then((answer) => {
+        const empDeletion = answer.empList;
+        empToDelete.push(empDeletion);
+      })
+      .then(() => {
+        inquirer
+          .prompt([
+            {
+              type: 'list',
+              name: 'confirmEmp',
+              message: 'Is this the correct Employee file to delete?',
+              choices: ['NO', 'YES'],
+            },
+          ])
+          .then((answer) => {
+            if (answer.confirmEmp === 'NO') {
+              return deleteEmp();
+            } else {
+              const deleteSql = `DELETE FROM employee
+                                WHERE id = ${empToDelete}`;
+              db.query(deleteSql, empToDelete, (err, res) => {
+                if (err) throw err;
+
+                console.info(`Employee #${empToDelete} has been Deleted!`);
+                allEmployees();
+              });
+            }
+          });
+      });
+  });
+};
+
+const deleteRole = () => {
+  const roleSql = `SELECT * FROM role`;
+  const roleToDelete = [];
+
+  db.query(roleSql, (err, res) => {
+    if (err) throw err;
+
+    const roles = res.map(({ title, id }) => ({
+      name: title,
+      value: id,
+    }));
+
+    inquirer
+      .prompt([
+        {
+          type: 'list',
+          name: 'roleList',
+          message: 'Which Role is to be Delete?',
+          choices: roles,
+        },
+      ])
+      .then((answer) => {
+        const roleDeletion = answer.roleList;
+        roleToDelete.push(roleDeletion);
+      })
+      .then(() => {
+        inquirer
+          .prompt([
+            {
+              type: 'list',
+              name: 'confirmRole',
+              message: 'Is this the correct Role to delete?',
+              choices: ['NO', 'YES'],
+            },
+          ])
+          .then((answer) => {
+            if (answer.confirmRole === 'NO') {
+              return deleteRole();
+            } else {
+              const deleteSql = `DELETE FROM role
+                                WHERE id = ${roleToDelete}`;
+              db.query(deleteSql, roleToDelete, (err, res) => {
+                if (err) throw err;
+
+                console.info(`The Role has been Deleted!`);
+                allRoles();
+              });
+            }
+          });
+      });
+  });
+};
 
 const quit = () => db.end();
 
