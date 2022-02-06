@@ -24,7 +24,6 @@ const promptUser = () => {
           'View all Employees',
           'View all Roles',
           'View Employees by Department',
-          'View Employees by Manager',
           'Add a Department',
           'Add an Employee',
           'Add a Role',
@@ -109,7 +108,7 @@ const returnPromptUser = () => {
       if (answer.confirmReturn) {
         return promptUser();
       }
-      return db.end();
+      return quit();
     });
 };
 
@@ -148,24 +147,22 @@ const allRoles = () => {
 };
 
 const empByDept = () => {
-  inquirer
-    .prompt([
-      {
-        type: 'list',
-        name: 'departments',
-        message: 'Which Department would you like to access?',
-        choices: ['Engineering', 'Finance', 'Legal', 'Management', 'Sales'],
-      },
-    ])
-    .then((answer) => {
-      if (
-        answer.departments === 'Engineering' ||
-        answer.departments === 'Finance' ||
-        answer.departments === 'Legal' ||
-        answer.departments === 'Management' ||
-        answer.departments === 'Sales'
-      ) {
-        let department = answer.departments;
+  const deptSql = `SELECT name FROM department`;
+
+  db.query(deptSql, (err, res) => {
+    if (err) throw err;
+    const depts = res.map(({ name }) => ({ name: name, value: name }));
+    inquirer
+      .prompt([
+        {
+          type: 'list',
+          name: 'departments',
+          message: 'Which Department would you like to access?',
+          choices: depts,
+        },
+      ])
+      .then((answer) => {
+        let dept = answer.departments;
 
         let sql = `SELECT employee.id AS ID, concat(employee.first_name, ' ', employee.last_name) AS 'Employee Name', department.name AS Department, role.title AS Role 
                   FROM employee 
@@ -173,54 +170,15 @@ const empByDept = () => {
                   ON (role.id = employee.role_id) 
                   LEFT JOIN department 
                   ON department.id = role.department_id 
-                  WHERE department.name = "${department}"`;
+                  WHERE department.name = "${dept}"`;
         db.query(sql, (err, res) => {
           if (err) throw err;
           console.table(res);
 
           returnPromptUser();
         });
-      }
-    });
-};
-
-const empByManager = () => {
-  inquirer
-    .prompt([
-      {
-        type: 'list',
-        name: 'departments',
-        message: "Which Manager's Team would you like to access?",
-        choices: ['Engineering', 'Finance', 'Legal', 'Sales'],
-      },
-    ])
-    .then((answer) => {
-      if (
-        answer.departments === 'Engineering' ||
-        answer.departments === 'Finance' ||
-        answer.departments === 'Legal' ||
-        answer.departments === 'Sales'
-      ) {
-        let department = answer.departments;
-
-        let sql = `SELECT concat(m.first_name, ' ', m.last_name) AS Manager, concat(e.first_name, ' ', e.last_name) AS 'Employee Name', e.id AS ID, role.title AS Role, department.name AS Department 
-                  FROM employee e
-                  LEFT JOIN employee m
-                  ON e.manager_id = m.id
-                  LEFT JOIN role
-                  ON (role.id = e.role_id)
-                  LEFT JOIN department 
-                  ON department.id = role.department_id
-                  WHERE department.name = "${department}"
-                  `;
-        db.query(sql, (err, res) => {
-          if (err) throw err;
-          console.table(res);
-
-          returnPromptUser();
-        });
-      }
-    });
+      });
+  });
 };
 
 const addDept = () => {
@@ -375,7 +333,7 @@ const addRole = () => {
       db.query(roleSql, (err, res) => {
         if (err) throw err;
 
-        const dept = res.map(({ name, id }) => ({ name: name, value: id }));
+        const depts = res.map(({ name, id }) => ({ name: name, value: id }));
 
         inquirer
           .prompt([
@@ -384,7 +342,7 @@ const addRole = () => {
               name: 'department',
               message:
                 'What department would you like the new Role associated?',
-              choices: dept,
+              choices: depts,
             },
           ])
           .then((deptChoice) => {
@@ -448,7 +406,7 @@ const updateRole = () => {
               {
                 type: 'list',
                 name: 'role',
-                message: 'What is the Employees updated Role?',
+                message: `What is the Employee's updated Role?`,
                 choices: roles,
               },
             ])
